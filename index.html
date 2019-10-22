@@ -139,8 +139,7 @@ Blockly.Python['vk_api'] = function(block) {
   
   
    var CountAnswer = 1;
-   var Array_Answer=[];
-   var Array_Weight=[];
+
    //блок для ответов с мутацией
 //add in category html 
 //<block type="lists_answer"> <mutation items_answer="1"></mutation></mutation></block>
@@ -278,32 +277,31 @@ this.setInputsInline(true);
 
 Blockly.Python['lists_answer'] = function(block){
   var b=Array(block.itemCount_);
-  
+  var Array_Answer=[];
+  var Array_Weight=[];
+  var code = "var weight=Math.floor(Math.random());\n";
+
   for(i=0;i<block.itemCount_;i++){
-    if(i==0){
-      b[i]="if "+Blockly.Python.valueToCode(block,"Answer"+i,Blockly.Python.ORDER_NONE)
-    }
-    else if(i>0) { b[i]="elif "+Blockly.Python.valueToCode(block,"Answer"+i,Blockly.Python.ORDER_NONE)||"None";}
-   
-  }
-    var code = "var weight=Math.floor(Math.random());\n"
-  return code + b.join("")
-};
+    b[i]=Blockly.Python.valueToCode(block,"Answer"+i,Blockly.Python.ORDER_NONE);
+      if( b[i].indexOf(",")>0){
+        Array_Answer.push(b[i].slice(0, b[i].indexOf(",")));
+        Array_Weight.push(b[i].slice(b[i].indexOf(",")+1))
+      } else{
+        Array_Answer.push(b[i]);
+        Array_Weight.push("#");
+      }
+   }
+  return "["+Array_Answer+"]"+"["+Array_Weight+"]" 
+}
 
 
 Blockly.Python['answer_weight'] = function(block) {
   var value_answer = Blockly.Python.valueToCode(block, 'answer', Blockly.Python.ORDER_ATOMIC);
   var value_weight = Blockly.Python.valueToCode(block, 'weight', Blockly.Python.ORDER_ATOMIC);
+  // TODO: Assemble Python into code variable.
+  var code = Array(value_answer, value_weight);
   
-  if (CountAnswer==1){
-    var code = "weight <="+ value_weight +":\n" + "  alert("+value_answer+")\n"  
-  }
-  else if (CountAnswer>1){
-    var code = "weight <="+ value_weight +":\n" + "  alert("+value_answer+")\n"
-  }
-  //var code = Array(value_answer, value_weight);
-  
-  return [code, Blockly.Python.ORDER_NONE]
+  return [code, Blockly.Python.ORDER_ATOMIC]
 };
 
 /*function Save(){
