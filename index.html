@@ -1,0 +1,312 @@
+<head>
+  <script src="blockly_compressed.js"></script> <!--импорт библиотеки ядра Blockly-->
+  <script src="blocks_compressed.js"></script> <!--импорт библиотеки основных блоков-->
+  <script src="msg/js/en.js"></script> <!--импорт библиотеки сообщений-->
+  <script src="javascript_compressed.js"> </script>
+  <script src="python_compressed.js"> </script>
+</head>
+
+<body>
+  <div id="blocklyDiv" style="float: left; height: 90%; width: 70%;"></div> <!--настройки размера поля -->
+
+	<xml id="toolbox" style="display: none"><!--отображение левой панели -->
+    
+	    <category name="Логика">
+			<block type="controls_if"></block>
+			<block type="procedures_defreturn"></block>
+			<block type="logic_compare"></block>
+			<block type="input_text"></block>
+      <block type="input_text1"></block>
+
+			<block type="answer_weight"></block>
+			<block type="lists_answer"> <mutation items_answer="1"></mutation></mutation></block>
+			
+			
+		</category>
+
+		<category name="Случайные числа">
+			<block type="math_random_float"></block>
+			<block type="math_random_int"></block>
+		</category>	
+		
+		<category name="Другое">
+			<block type="text"></block>
+			<block type="math_number"></block>
+			<block type="vk_api"></block>
+
+		</category>
+		
+		<category name="Переменные" custom="VARIABLE"></category>
+		
+		<category name="Функции" custom="PROCEDURE">
+			<block type="controls_if"></block>
+			<block type="procedures_defreturn"></block>
+		</category>
+
+	
+	</xml>
+
+	<div id="code">
+		<textarea id="code_area" style="height: 90%; width: 25%"></textarea>
+		<!--<input id="inputId" type="button" value="Save" onclick="Save()">
+		<input id="inputId1" type="button" value="Insert" onclick="Insert()">-->
+	</div> 
+	
+	<script> 
+
+	//настройки правой части окна
+	var workspace = Blockly.inject('blocklyDiv',
+ 		{toolbox: document.getElementById('toolbox'),
+			grid:{
+			spacing: 20, // расстояние между элементами сетки
+			length: 3, // размер элементов сетки
+			colour: '#ccc', // цвет сетки
+			snap: true // режим привязки к сетке
+			}, 
+			zoom:{
+			controls: true, // режим отображения элементов управления масштабом
+			wheel: true, // режим использования колеса мыши для масштабирования
+			startScale: 1.0, // начальный масштаб
+			maxScale: 3, // максимально возможное увеличение
+			minScale: 0.3, // минимально возможное уменьшение
+			scaleSpeed: 1.3
+			}, // шаг изменения масштаба
+			trashcan: true //отображение корзины
+		}
+	);
+
+	Blockly.svgResize(workspace); //для фикса ошибки масштабирования
+
+	
+
+	//структура блока ввода текста
+	Blockly.Blocks['input_text'] = {
+		init: function() {
+			this.setColour(256)
+			this.appendDummyInput()
+        .appendField("Событие получения сообщения в боте");
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+
+		}
+	};
+  Blockly.Blocks['input_text1'] = {
+    init: function() {
+      this.setColour(256)
+      this.appendDummyInput()
+        .appendField("Текст собщения из бота");
+      this.setOutput(true, null);
+    }
+  };
+	//описание кода блока ввода текста
+	Blockly.Python['input_text'] = function(block) {
+    var code_input_text = "from vk_api.longpoll import VkLongPoll, VkEventType\n" + "longpoll = VkLongPoll(vk_session)\n"+"vk = vk_session.get_api()\n" + "for event in longpoll.listen():\n" + " if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:\n" 
+
+
+
+    
+		//var code_input_text = "input('введите сообщение')"
+		return code_input_text; 
+	}
+Blockly.Python['input_text1'] = function(block) {
+    var code_input_text = "event.text" 
+
+
+
+    
+    //var code_input_text = "input('введите сообщение')"
+    return [code_input_text,Blockly.Python.ORDER_NONE]; 
+  }
+
+
+	
+	//вывод кода 
+    function myUpdateFunction(event) {
+      var code = Blockly.Python.workspaceToCode(workspace);
+      document.getElementById('code_area').value = code;
+    }
+    workspace.addChangeListener(myUpdateFunction);
+	
+	
+   var CountAnswer = 1;
+   var Array_Answer=[];
+   var Array_Weight=[];
+   //блок для ответов с мутацией
+//add in category html 
+//<block type="lists_answer"> <mutation items_answer="1"></mutation></mutation></block>
+Blockly.Blocks['lists_answer'] = {
+  init: function() {
+    this.setColour(150)
+    this.itemCount_ = 2;
+    this.updateShape_();
+    //this.setOutput(true, 'Array');
+    this.setPreviousStatement(true, null)
+	this.setNextStatement(true, null)
+    this.setMutator(new Blockly.Mutator(['lists_answer_item']));
+  },
+
+  mutationToDom() {
+    var container = Blockly.utils.xml.createElement('mutation');
+    container.setAttribute('items_answer', this.itemCount_);
+    return container;
+  },
+  
+  domToMutation: function(xmlElement) {
+    this.itemCount_ = parseInt(xmlElement.getAttribute('items_answer'), 10);
+    this.updateShape_();
+  },
+ 
+  decompose: function(workspace) {
+    var containerBlock = workspace.newBlock('lists_answer_container');
+    containerBlock.initSvg();
+    var connection = containerBlock.getInput('STACK').connection;
+    for (var i = 0; i < this.itemCount_; i++) {
+      var itemBlock = workspace.newBlock('lists_answer_item');
+      itemBlock.initSvg();
+      connection.connect(itemBlock.previousConnection);
+      connection = itemBlock.nextConnection;
+    }
+    return containerBlock;
+  },
+  
+  compose: function(containerBlock) {
+    var itemBlock = containerBlock.getInputTargetBlock('STACK');
+    var connections = [];
+    while (itemBlock) {
+      connections.push(itemBlock.valueConnection_);
+      itemBlock = itemBlock.nextConnection &&
+          itemBlock.nextConnection.targetBlock();
+    }
+    for (var i = 0; i < this.itemCount_; i++) {
+      var connection = this.getInput('Answer' + i).connection.targetConnection;
+      if (connection && connections.indexOf(connection) == -1) {
+        connection.disconnect();
+      }
+    }
+    this.itemCount_ = connections.length;
+    this.updateShape_();
+    for (var i = 0; i < this.itemCount_; i++) {
+      Blockly.Mutator.reconnect(connections[i], this, 'Answer' + i);
+    }
+  },
+  
+  saveConnections: function(containerBlock) {
+    var itemBlock = containerBlock.getInputTargetBlock('STACK');
+    var i = 0;
+    while (itemBlock) {
+      var input = this.getInput('Answer' + i);
+      itemBlock.valueConnection_ = input && input.connection.targetConnection;
+      i++;
+      itemBlock = itemBlock.nextConnection && itemBlock.nextConnection.targetBlock();
+    }
+  },
+ 
+  updateShape_: function() {
+    if (this.itemCount_ && this.getInput('EMPTY')) {
+      this.removeInput('EMPTY');
+    } else if (!this.itemCount_ && !this.getInput('EMPTY')) {
+      this.appendDummyInput('EMPTY')
+    }
+    // Add new inputs.
+    for (var i = 0; i < this.itemCount_; i++) {
+      if (!this.getInput('Answer' + i)) {
+        var input = this.appendValueInput('Answer' + i);
+        if (i == 0) {
+          input.appendField("варианты ответов");
+        }
+      }
+    }
+    // Remove deleted inputs.
+    while (this.getInput('Answer' + i)) {
+      this.removeInput('Answer' + i);
+      i++;
+    }
+    CountAnswer = this.itemCount_;
+  }
+};
+  
+
+Blockly.Blocks['lists_answer_container'] = {
+
+  init: function() {
+    this.setColour(150)
+    this.appendDummyInput()
+        .appendField("список ответов")
+    this.appendStatementInput('STACK');
+
+    this.contextMenu = false;
+  }
+};
+
+Blockly.Blocks['lists_answer_item'] = {
+
+  init: function() {
+    this.setColour(256)
+    this.appendDummyInput()
+      .appendField("ответ")
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+   
+    this.contextMenu = false;
+  }
+};
+Blockly.Blocks['answer_weight'] = {
+
+	init: function() {
+		this.setColour(256)
+		this.appendValueInput("answer")
+			.appendField("ответ");
+		this.appendValueInput("weight")
+			.appendField("вес");
+this.setInputsInline(true);	
+		this.setOutput(true, null);
+   
+   
+  }
+};
+Blockly.Blocks['vk_api'] = {
+
+	init: function() {
+		this.setColour(256)
+		this.appendValueInput("token")
+			.appendField("ввкдите токен для подключения к вк");
+		    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+  }
+};
+
+Blockly.Python['lists_answer'] = function(block){
+	var b=Array(block.itemCount_);
+	
+	for(i=0;i<block.itemCount_;i++){b[i]=Blockly.Python.valueToCode(block,"Answer"+i,Blockly.Python.ORDER_NONE)||"None";}
+  return "["+b.join("#")+"]"
+};
+
+
+Blockly.Python['answer_weight'] = function(block) {
+  var value_answer = Blockly.Python.valueToCode(block, 'answer', Blockly.Python.ORDER_ATOMIC);
+  var value_weight = Blockly.Python.valueToCode(block, 'weight', Blockly.Python.ORDER_ATOMIC);
+  // TODO: Assemble Python into code variable.
+  var code = Array(value_answer, value_weight);
+  
+  return ["["+code+"]", Blockly.Python.ORDER_NONE]
+};
+Blockly.Python['vk_api'] = function(block) {
+  var value_token = Blockly.Python.valueToCode(block, 'token', Blockly.Python.ORDER_ATOMIC);
+  // TODO: Assemble Python into code variable.
+  var code = "import requests\n" + "import vk_api\n"+"vk_session = vk_api.VkApi(token=" +value_token+")\n";
+  
+  return code;
+};
+/*function Save(){
+localStorage.setItem("blocklyDiv", document.getElementById("blocklyDiv").innerHTML);}
+
+function Insert(){
+if(localStorage.getItem("blocklyDiv")){
+	 window.location.reload();
+document.getElementById("blocklyDiv").innerHTML = localStorage.getItem("blocklyDiv");
+
+}}*/
+
+	</script>
+    
