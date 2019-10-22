@@ -13,10 +13,10 @@
     
     <category name="Логика">
       <block type="controls_if"></block>
-      <block type="procedures_defreturn"></block>
-      <block type="logic_compare"></block>
+      
+      
       <block type="answer_weight"></block>
-      <block type="like"> 
+      <block type="like"></block> 
       <block type="lists_answer"> 
         <mutation items_answer="1"></mutation>
       </block>
@@ -48,8 +48,8 @@
 
   <div id="code">
     <textarea id="code_area" style="height: 90%; width: 25%"></textarea>
-    <!--<input id="inputId" type="button" value="Save" onclick="Save()">
-    <input id="inputId1" type="button" value="Insert" onclick="Insert()">-->
+    <input id="inputId" type="button" value="Save" onclick="Save()">
+    <input id="inputId1" type="button" value="Insert" onclick="Insert()">
   </div> 
   
   <script> 
@@ -168,41 +168,7 @@
       return [code, Blockly.Python.ORDER_ATOMIC]
     };
 
-    //обработчик блока ответов с мутацией
-    Blockly.Python['lists_answer'] = function(block){
-      var b=Array(block.itemCount_);
-      var Array_Answer=[];
-      var Array_Weight=[];
 
-      for(i=0;i<block.itemCount_;i++){
-        b[i]=Blockly.Python.valueToCode(block,"Answer"+i,Blockly.Python.ORDER_NONE);
-          if( b[i].indexOf(",")>0){
-            Array_Answer.push(b[i].slice(0, b[i].indexOf(",")));
-            if (b[i].slice(b[i].indexOf(",")+1).length>0){
-            Array_Weight.push(b[i].slice(b[i].indexOf(",")+1))}else {Array_Weight.push("0.1");
-            }
-          } else{
-            Array_Answer.push(b[i]);
-            Array_Weight.push("0.1");
-          }
-       }
-        //функция рандомного ответа на питоне
-      var codepercentageChance = "import random\n"+
-      "def percentageChance(values, chances):\n"+
-          "   pool=[]\n"+
-          "   for i in range(len(chances)):\n"+
-            "      for i2 in range(chances[i]):\n"+
-            "         pool.append(values[i])\n"+
-          "   swap = random.randint(0,len(pool)-1)\n"+
-          "   return (pool[swap])\n"
-        //"percentageChance(["+Array_Answer+"],["+Array_Weight+"])"
-      var code = "vk.messages.send(user_id=event.user_id, message=percentageChance(["+Array_Answer+"],["+Array_Weight+"]))" 
-
-      //console.log(percentageChance(Array_Answer,Array_Weight));
-      //return "["+Array_Answer+"]"+"["+Array_Weight+"]" 
-      //return "percentageChance(["+Array_Answer+"],["+Array_Weight+"])";
-      return codepercentageChance + code
-    }
 
     //функция вывода ответа с учетом веса(js), тот же принцип используется выше в питоне
     var percentageChance = function(values, chances) {
@@ -310,7 +276,7 @@
       }
       CountAnswer = this.itemCount_;
     }
-    };
+    }
     //вспомогательный блок мутации
     Blockly.Blocks['lists_answer_container'] = {
       init: function() {
@@ -336,6 +302,43 @@
       }
     };
 
+    //обработчик блока ответов с мутацией
+    Blockly.Python['lists_answer'] = function(block){
+      var b=Array(block.itemCount_);
+      var Array_Answer=[];
+      var Array_Weight=[];
+
+      for(i=0;i<block.itemCount_;i++){
+        b[i]=Blockly.Python.valueToCode(block,"Answer"+i,Blockly.Python.ORDER_NONE);
+          if( b[i].indexOf(",")>0){
+            Array_Answer.push(b[i].slice(0, b[i].indexOf(",")));
+            if (b[i].slice(b[i].indexOf(",")+1).length>0){
+            Array_Weight.push(b[i].slice(b[i].indexOf(",")+1))}else {Array_Weight.push("0.1");
+            }
+          } else{
+            Array_Answer.push(b[i]);
+            Array_Weight.push("0.1");
+          }
+       }
+        //функция рандомного ответа на питоне
+      var codepercentageChance = "import random\n"+
+      "def percentageChance(values, chances):\n"+
+          "   pool=[]\n"+
+          "   for i in range(len(chances)):\n"+
+            "      for i2 in range(chances[i]):\n"+
+            "         pool.append(values[i])\n"+
+          "   swap = random.randint(0,len(pool)-1)\n"+
+          "   return (pool[swap])\n"
+        //"percentageChance(["+Array_Answer+"],["+Array_Weight+"])"
+      var code = "vk.messages.send(user_id=event.user_id, message=percentageChance(["+Array_Answer+"],["+Array_Weight+"]))" 
+
+      //console.log(percentageChance(Array_Answer,Array_Weight));
+      //return "["+Array_Answer+"]"+"["+Array_Weight+"]" 
+      //return "percentageChance(["+Array_Answer+"],["+Array_Weight+"])";
+      return codepercentageChance + code
+    }
+   
+
     //вывод кода в правой части экрана
     function myUpdateFunction(event) {
       var code = Blockly.Python.workspaceToCode(workspace);
@@ -344,15 +347,21 @@
     workspace.addChangeListener(myUpdateFunction);
 
 
-    /*function Save(){
-    localStorage.setItem("blocklyDiv", document.getElementById("blocklyDiv").innerHTML);}
+    function Save(){
+      var xml = Blockly.Xml.workspaceToDom(workspace);
+      var xml_text = Blockly.Xml.domToText(xml);
+      localStorage.setItem("blocklyXML", xml_text);
+      alert("рабочая область была сохранена");
+    }
 
     function Insert(){
-    if(localStorage.getItem("blocklyDiv")){
-       window.location.reload();
-    document.getElementById("blocklyDiv").innerHTML = localStorage.getItem("blocklyDiv");
+      var xml = Blockly.Xml.textToDom(localStorage.getItem("blocklyXML"));
+      //Blockly.Xml.domToWorkspace(xml, workspace); 
+      Blockly.Xml.clearWorkspaceAndLoadFromXml(xml, workspace); 
+      alert("рабочая область была очищена и восстановлена из последнего сохранения");
+       //clearWorkspaceAndLoadFromXml( localStorage.getItem("blocklyXML"),localStorage.getItem("blocklyWORK"))
 
-    }}*/
+    }
 
   </script>
     
