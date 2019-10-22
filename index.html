@@ -48,6 +48,10 @@
 
   <div id="code">
     <textarea id="code_area" style="height: 90%; width: 25%"></textarea>
+  </div> 
+
+  <div id="controls">
+    <br>
     <input id="inputId" type="button" value="Save" onclick="Save()">
     <input id="inputId1" type="button" value="Insert" onclick="Insert()">
   </div> 
@@ -348,20 +352,33 @@
 
 
     function Save(){
-      var xml = Blockly.Xml.workspaceToDom(workspace);
-      var xml_text = Blockly.Xml.domToText(xml);
-      localStorage.setItem("blocklyXML", xml_text);
-      alert("рабочая область была сохранена");
+      var result = confirm("Сохранить текущий прогресс?\n Прошлая рабочая область будет удалена");
+      if (result){
+        var xml = Blockly.Xml.workspaceToDom(workspace);
+        var xml_text = Blockly.Xml.domToText(xml);
+        localStorage.setItem("blocklyXML", xml_text);
+        alert("рабочая область была сохранена");
+      }
+      
     }
 
     function Insert(){
-      var xml = Blockly.Xml.textToDom(localStorage.getItem("blocklyXML"));
-      //Blockly.Xml.domToWorkspace(xml, workspace); 
-      Blockly.Xml.clearWorkspaceAndLoadFromXml(xml, workspace); 
-      alert("рабочая область была очищена и восстановлена из последнего сохранения");
-       //clearWorkspaceAndLoadFromXml( localStorage.getItem("blocklyXML"),localStorage.getItem("blocklyWORK"))
-
+      var result = confirm("Восстановить рабочую область из последнего сохранения?\n Текущая рабочая область будет очищена");
+      if (result){
+        var xml = Blockly.Xml.textToDom(localStorage.getItem("blocklyXML"));
+        //Blockly.Xml.domToWorkspace(xml, workspace); 
+        Blockly.Xml.clearWorkspaceAndLoadFromXml(xml, workspace); 
+        alert("рабочая область была восстановлена");
+      }
     }
+
+    window.onbeforeunload = function() {
+      return false;
+    };
+
+
+
+
 
   </script>
     
