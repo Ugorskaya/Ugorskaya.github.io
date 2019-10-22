@@ -285,7 +285,10 @@ Blockly.Python['lists_answer'] = function(block){
     b[i]=Blockly.Python.valueToCode(block,"Answer"+i,Blockly.Python.ORDER_NONE);
       if( b[i].indexOf(",")>0){
         Array_Answer.push(b[i].slice(0, b[i].indexOf(",")));
-        Array_Weight.push(b[i].slice(b[i].indexOf(",")+1))
+        if (b[i].slice(b[i].indexOf(",")+1).length>0){
+        Array_Weight.push(b[i].slice(b[i].indexOf(",")+1))}
+        else {Array_Weight.push("#");
+        }
       } else{
         Array_Answer.push(b[i]);
         Array_Weight.push("#");
