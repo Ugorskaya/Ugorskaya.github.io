@@ -11,18 +11,21 @@
 
 	<xml id="toolbox" style="display: none"><!--отображение левой панели -->
     
-	    <category name="Логика">
-			<block type="controls_if"></block>
-			<block type="procedures_defreturn"></block>
-			<block type="logic_compare"></block>
-			<block type="input_text"></block>
-      <block type="input_text1"></block>
-
-			<block type="answer_weight"></block>
-			<block type="lists_answer"> <mutation items_answer="1"></mutation></mutation></block>
-			
-			
+	   <category name="Логика">
+  		<block type="controls_if"></block>
+  		<block type="procedures_defreturn"></block>
+  		<block type="logic_compare"></block>
+  		<block type="answer_weight"></block>
+  		<block type="lists_answer"> 
+        <mutation items_answer="1"></mutation>
+      </block>
 		</category>
+
+    <category name="VK">
+      <block type="input_text"></block>
+      <block type="input_text1"></block>
+      <block type="vk_api"></block>
+    </category> 
 
 		<category name="Случайные числа">
 			<block type="math_random_float"></block>
@@ -32,8 +35,6 @@
 		<category name="Другое">
 			<block type="text"></block>
 			<block type="math_number"></block>
-			<block type="vk_api"></block>
-
 		</category>
 		
 		<category name="Переменные" custom="VARIABLE"></category>
