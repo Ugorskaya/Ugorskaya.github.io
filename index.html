@@ -286,16 +286,43 @@ Blockly.Python['lists_answer'] = function(block){
       if( b[i].indexOf(",")>0){
         Array_Answer.push(b[i].slice(0, b[i].indexOf(",")));
         if (b[i].slice(b[i].indexOf(",")+1).length>0){
-        Array_Weight.push(b[i].slice(b[i].indexOf(",")+1))}
-        else {Array_Weight.push("#");
+        Array_Weight.push(b[i].slice(b[i].indexOf(",")+1))}else {Array_Weight.push("0.1");
         }
       } else{
         Array_Answer.push(b[i]);
-        Array_Weight.push("#");
+        Array_Weight.push("0.1");
       }
    }
-  return "["+Array_Answer+"]"+"["+Array_Weight+"]" 
+    //функция рандомного ответа на питоне
+codepercentageChance = "import random\n"+
+"def percentageChance(values, chances):\n"+
+    "   pool=[]\n"+
+    "   for i in range(len(chances)):\n"+
+      "      for i2 in range(chances[i]):\n"+
+      "         pool.append(values[i])\n"+
+    "   swap = random.randint(0,len(pool)-1)\n"+
+    "   return (pool[swap])\n"+
+    "percentageChance(["+Array_Answer+"],["+Array_Weight+"])"
+  console.log(percentageChance(Array_Answer,Array_Weight));
+  //return "["+Array_Answer+"]"+"["+Array_Weight+"]" 
+  //return "percentageChance(["+Array_Answer+"],["+Array_Weight+"])";
+  return codepercentageChance 
 }
+//отнормировать веса
+//функция рандома и вывода ответа
+var percentageChance = function(values, chances) {
+  var pool = [];
+   for ( var i = 0; i < chances.length; i++ ) {
+      for ( var i2 = 0; i2 < chances[i]; i2++ ) {
+         pool.push(values[i]);
+      }
+   }
+
+  var swap = Math.floor(Math.random()*(pool.length));
+  //console.log(swap);
+  return pool[swap];
+ }
+
 
 
 Blockly.Python['answer_weight'] = function(block) {
