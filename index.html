@@ -83,14 +83,10 @@
         this.appendValueInput("message")
           .setCheck(null)
           .appendField("При отправлении человеком в вк сообщения")
-          //.appendField(new Blockly.FieldTextInput("message"), "PARAM")
           .appendField("=");
         this.appendStatementInput("answer(message)")
           .setCheck(null)
           .appendField("делает");
-        //this.appendValueInput("return")
-          //.setCheck(null)
-          //.appendField("возвращает");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(256)
@@ -99,11 +95,9 @@
     }
     //описание события на питоне
     Blockly.Python['procedures_answer'] = function(block) {
-      //var text_name = block.getFieldValue('NAME');
-      //var mess_param = block.getFieldValue('PARAM');
+      
       var mes = Blockly.Python.valueToCode(block, 'message', Blockly.Python.ORDER_ATOMIC);
       var statements_answer_message_ = Blockly.Python.statementToCode(block, 'answer(message)');
-      //var value_return = Blockly.Python.valueToCode(block, 'return', Blockly.Python.ORDER_ATOMIC);
       
       var code = 'def answer'+mes+':\n'+statements_answer_message_;
       return code;
