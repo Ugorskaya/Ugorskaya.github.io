@@ -7,7 +7,7 @@
 </head>
 
 <body>
-  <div id="blocklyDiv" style="float: left; height: 90%; width: 70%;"></div> <!--настройки размера поля -->
+  <div id="blocklyDiv" style="float: left; height: 100%; width: 74%;"></div> <!--настройки размера поля -->
 
   <xml id="toolbox" style="display: none"><!--отображение левой панели -->
     
@@ -43,8 +43,9 @@
 
   <div id="controls">
     <br>
-    <input id="inputId" type="button" value="Save" onclick="Save()">
-    <input id="inputId1" type="button" value="Insert" onclick="Insert()">
+    <input id="inputId" type="button" value="Сохранить прогресс" onclick="Save()">
+    <input id="inputId1" type="button" value="Восстановить прогресс" onclick="Insert()">
+    <input id="inputId1" type="button" value="Бот готов" onclick="Donwload()">
   </div> 
   
   <script> 
@@ -371,6 +372,13 @@
         //Blockly.Xml.domToWorkspace(xml, workspace); 
         Blockly.Xml.clearWorkspaceAndLoadFromXml(xml, workspace); 
         alert("рабочая область была восстановлена");
+      }
+    }
+    
+    function Donwload(){
+      var result = confirm("Бот готов?\n");
+      if (result){
+       alert("что-то делаем, ага");
       }
     }
 
