@@ -13,8 +13,6 @@
     
     <category name="Логика">
       <block type="controls_if"></block>
-      
-      
       <block type="answer_weight"></block>
       <block type="like"></block> 
       <block type="lists_answer"> 
@@ -23,9 +21,9 @@
     </category>
 
     <category name="VK">
-      <block type="input_text"></block>
-      <block type="input_text1"></block>
-      <block type="vk_api"></block>
+      <block type="vk_api"></block><!--присвоение токена-->
+      <block type="procedures_answer"></block><!--получение сообщения-->
+      <block type="input_text1"></block><!--переменная с сообщением-->
     </category> 
 
     <category name="Случайные числа">
@@ -40,10 +38,8 @@
     
     <category name="Переменные" custom="VARIABLE"></category>
     
-    <category name="Функции" custom="PROCEDURE">
-      <block type="controls_if"></block>
-      <block type="procedures_defreturn"></block>
-    </category>
+    <category name="Функции" custom="PROCEDURE"></category>
+
   </xml>
 
   <div id="code">
@@ -81,17 +77,38 @@
 
     Blockly.svgResize(workspace); //для фикса ошибки масштабирования
 
-    //структура блока ввода текста
-    Blockly.Blocks['input_text'] = {
+    //структура события ввода сообщения в вк
+    Blockly.Blocks['procedures_answer'] = {
       init: function() {
+        this.appendValueInput("message")
+          .setCheck(null)
+          .appendField("При отправлении человеком в вк сообщения")
+          //.appendField(new Blockly.FieldTextInput("message"), "PARAM")
+          .appendField("=");
+        this.appendStatementInput("answer(message)")
+          .setCheck(null)
+          .appendField("делает");
+        //this.appendValueInput("return")
+          //.setCheck(null)
+          //.appendField("возвращает");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
         this.setColour(256)
-        this.appendDummyInput()
-          .appendField("Событие получения сообщения в боте");
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
+      this.setTooltip("Функция принимающая на вход переменную сообщения из вк");
       }
+    }
+    //описание события на питоне
+    Blockly.Python['procedures_answer'] = function(block) {
+      //var text_name = block.getFieldValue('NAME');
+      //var mess_param = block.getFieldValue('PARAM');
+      var mes = Blockly.Python.valueToCode(block, 'message', Blockly.Python.ORDER_ATOMIC);
+      var statements_answer_message_ = Blockly.Python.statementToCode(block, 'answer(message)');
+      //var value_return = Blockly.Python.valueToCode(block, 'return', Blockly.Python.ORDER_ATOMIC);
+      
+      var code = 'def answer'+mes+':\n'+statements_answer_message_;
+      return code;
     };
-    
+
     //блок с переменной вк сообщения
     Blockly.Blocks['input_text1'] = {
       init: function() {
@@ -101,14 +118,7 @@
         this.setOutput(true, null);
       }
     };
-
-    //описание кода блока ввода текста в вк
-    Blockly.Python['input_text'] = function(block) {
-      var code_input_text = "from vk_api.longpoll import VkLongPoll, VkEventType\n" + "longpoll = VkLongPoll(vk_session)\n"+"vk = vk_session.get_api()\n" + "for event in longpoll.listen():\n" + " if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:\n" 
-      //var code_input_text = "input('введите сообщение')"
-      return code_input_text+"\n"; 
-    }
-    //переменная с сообщением
+    //описание переменной с сообщением на питоне
     Blockly.Python['input_text1'] = function(block) {
         //var code_input_text = "event.text" 
         return ["event.text",Blockly.Python.ORDER_NONE]; 
@@ -137,9 +147,11 @@
     Blockly.Blocks['vk_api'] = {
       init: function() {
         this.setColour(256)
+        this.appendDummyInput()
+          .appendField("Блок подключения к вк");
         this.appendValueInput("token")
-          .appendField("ввкдите токен для подключения к вк");
-        this.setPreviousStatement(true);
+          .appendField("ввкдите токен");
+        //this.setPreviousStatement(true);
         this.setNextStatement(true);
       }
     };
@@ -198,7 +210,7 @@
         this.updateShape_();
         //this.setOutput(true, 'Array');
         this.setPreviousStatement(true, null)
-        this.setNextStatement(true, null)
+        //this.setNextStatement(true, null)
         this.setMutator(new Blockly.Mutator(['lists_answer_item']));
       },
 
@@ -269,7 +281,7 @@
         if (!this.getInput('Answer' + i)) {
           var input = this.appendValueInput('Answer' + i);
           if (i == 0) {
-            input.appendField("варианты ответов");
+            input.appendField("Отправить один из вариантов ответов");
           }
         }
       }
@@ -286,10 +298,8 @@
       init: function() {
         this.setColour(150)
         this.appendDummyInput()
-            .appendField("список ответов")
+            .appendField("Варианты ответов")
         this.appendStatementInput('STACK');
-
-        this.contextMenu = false;
       }
     };
     //вспомогательный блок мутации
@@ -325,7 +335,7 @@
           }
        }
         //функция рандомного ответа на питоне
-      var codepercentageChance = "import random\n"+
+      /*var codepercentageChance = "import random\n"+
       "def percentageChance(values, chances):\n"+
           "   pool=[]\n"+
           "   for i in range(len(chances)):\n"+
@@ -333,13 +343,16 @@
             "         pool.append(values[i])\n"+
           "   swap = random.randint(0,len(pool)-1)\n"+
           "   return (pool[swap])\n"
-        //"percentageChance(["+Array_Answer+"],["+Array_Weight+"])"
-      var code = "vk.messages.send(user_id=event.user_id, message=percentageChance(["+Array_Answer+"],["+Array_Weight+"]))" 
+        //"percentageChance(["+Array_Answer+"],["+Array_Weight+"])"*/
+      //var code = "vk.messages.send(user_id=event.user_id, message=percentageChance(["+Array_Answer+"],["+Array_Weight+"]))" 
+      var codereturn = "vk.messages.send(user_id=event.user_id, message=random,choice(["+Array_Answer+"],["+Array_Weight+"]))\n" 
+
 
       //console.log(percentageChance(Array_Answer,Array_Weight));
       //return "["+Array_Answer+"]"+"["+Array_Weight+"]" 
       //return "percentageChance(["+Array_Answer+"],["+Array_Weight+"])";
-      return codepercentageChance + code
+      //return codepercentageChance + code
+      return codereturn;
     }
    
 
@@ -349,7 +362,7 @@
       document.getElementById('code_area').value = code;
     }
     workspace.addChangeListener(myUpdateFunction);
-
+    document.getElementById('code_area').readOnly = true;
 
     function Save(){
       var result = confirm("Сохранить текущий прогресс?\n Прошлая рабочая область будет удалена");
@@ -375,10 +388,6 @@
     window.onbeforeunload = function() {
       return false;
     };
-
-
-
-
 
   </script>
     
